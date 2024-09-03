@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace HotelBookingAPI.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/bookings")]
     public class DatPhongController : ControllerBase
     {
         private readonly IDatPhongService _datPhongService;

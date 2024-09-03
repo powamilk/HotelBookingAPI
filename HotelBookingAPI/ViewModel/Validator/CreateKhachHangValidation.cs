@@ -2,7 +2,7 @@
 
 namespace HotelBookingAPI.ViewModel.NewFolder
 {
-    public class CreateKhachHangValidation : AbstractValidator<KhachHangVM>
+    public class CreateKhachHangValidation : AbstractValidator<CreateKhachHangVM>
     {
         public CreateKhachHangValidation() 
         {

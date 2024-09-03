@@ -6,6 +6,8 @@ namespace HotelBookingAPI.ViewModel.NewFolder
     {
         public CreatePhongValidation() 
         {
+            // to do : hotel id,CheckInTime
+
             RuleFor(x => x.RoomType)
                 .NotEmpty().WithMessage("Loại phòng không được để trông")
                 .MaximumLength(100).WithMessage("Loại phòng không được quá 100 ký tự");

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace HotelBookingAPI.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/hotels")]
     public class PhongController : ControllerBase
     {
         private readonly IKhachSanService _khachSanService;
@@ -16,7 +16,7 @@ namespace HotelBookingAPI.Controllers
             _khachSanService = khachSanService;
         }
 
-        [HttpPost("{khachSanId}/phongs")]
+        [HttpPost("{hotelId}/rooms")]
         public IActionResult TaoPhong(int khachSanId, [FromBody] CreatePhongVM request)
         {
             var result = _khachSanService.CreatePhong(khachSanId, request, out string errorMessage);
@@ -27,7 +27,7 @@ namespace HotelBookingAPI.Controllers
             return CreatedAtAction(nameof(LayPhongTheoKhachSanId), new { khachSanId = khachSanId }, request);
         }
 
-        [HttpGet("{khachSanId}/phongs")]
+        [HttpGet("{hotelId}/rooms")]
         public IActionResult LayPhongTheoKhachSanId(int khachSanId)
         {
             var phongs = _khachSanService.GetPhongByKhachSanId(khachSanId, out string errorMessage);

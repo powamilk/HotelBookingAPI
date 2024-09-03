@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace HotelBookingAPI.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/customers")]
     public class KhachHangController : ControllerBase
     {
         private readonly IKhachHangService _khachHangService;

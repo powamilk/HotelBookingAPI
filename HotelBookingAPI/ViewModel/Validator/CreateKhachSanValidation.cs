@@ -17,7 +17,7 @@ namespace HotelBookingAPI.ViewModel.NewFolder
                .InclusiveBetween(1, 5).WithMessage("Đánh giá phải từ 1 đến 5 ");
 
             RuleFor(x => x.Description)
-                .MaximumLength(1000).WithMessage("Mô tả không được để trống");
+                .MaximumLength(1000).WithMessage("Mô tả tối đa 1000 kí tự");
 
             RuleFor(x => x.TotalRoom)
                 .GreaterThan(0).WithMessage("Tổng số phòng phải là số nguyên dương");

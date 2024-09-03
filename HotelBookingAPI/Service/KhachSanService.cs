@@ -12,12 +12,14 @@ namespace HotelBookingAPI.Service
         private readonly ILogger<KhachSanService> _logger;
         private readonly IValidator<CreatePhongVM> _phongValidator;
         private readonly IValidator<CreateKhachSanVM> _khachSanValidator;
+        private readonly IValidator<KhachSanUpdateVM> _khachSanUpdateVlidator;
 
-        public KhachSanService(ILogger<KhachSanService> logger, IValidator<CreatePhongVM> phongValidator, IValidator<CreateKhachSanVM> khachSanValidator)
+        public KhachSanService(ILogger<KhachSanService> logger, IValidator<CreatePhongVM> phongValidator, IValidator<CreateKhachSanVM> khachSanValidator, IValidator<KhachSanUpdateVM> khachSanUpdateValidator)
         {
             _logger = logger;
             _khachSanValidator = khachSanValidator;
             _phongValidator = phongValidator;
+            _khachSanUpdateVlidator = khachSanUpdateValidator;
         }
         public bool CreateKhachSan(CreateKhachSanVM request, out string errorMessage)
         {
@@ -37,8 +39,7 @@ namespace HotelBookingAPI.Service
                     Rating = request.Rating,
                     Description = request.Description,
                     TotalRoom = request.TotalRoom,
-                    CreateAt = DateTime.Now,
-                    UpdateAt = DateTime.Now
+                    CreateAt = DateTime.Now,  
                 };
                 _khachSans.Add(khachSan);
                 errorMessage = null;
@@ -188,7 +189,27 @@ namespace HotelBookingAPI.Service
 
         public bool UpdateKhachSan(int id, KhachSanUpdateVM request, out string errorMessage)
         {
-            throw new NotImplementedException();
+            var khachSan = _khachSans.FirstOrDefault(h => h.Id == id);
+            if(khachSan == null)
+            {
+                errorMessage = "Không tìm thấy khách sạn với Id này";
+                return false;
+            }
+            ValidationResult result = _khachSanUpdateVlidator.Validate(request);
+            if(!result.IsValid)
+            {
+                errorMessage = string.Join(",", result.Errors.Select(e => e.ErrorMessage));
+                return false;
+            } 
+            khachSan.Name = request.Name;
+            khachSan.Location = request.Location;
+            khachSan.Rating = request.Rating;
+            khachSan.Description = request.Description;
+            khachSan.TotalRoom = request.TotalRoom;
+            khachSan.UpdateAt = DateTime.Now;
+
+            errorMessage = null;
+            return true;
         }
     }
 }
