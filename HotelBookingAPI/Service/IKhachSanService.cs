@@ -11,5 +11,6 @@ namespace HotelBookingAPI.Service
         bool DeleteKhachSan(int id, out string errorMessage );
         bool CreatePhong(int khachSanId, CreatePhongVM request, out string errorMessage);
         List<PhongVM> GetPhongByKhachSanId(int khachSanId, out string errorMessage);
+        bool CheckKhachSanExist(int id);
     }
 }

@@ -1,9 +1,9 @@
 ﻿using FluentValidation;
-namespace HotelBookingAPI.ViewModel.NewFolder
+namespace HotelBookingAPI.ViewModel.Validator
 {
-    public class CreateKhachSanValidation : AbstractValidator<CreateKhachSanVM>
+    public class CreateKhachSanValidator : AbstractValidator<CreateKhachSanVM>
     {
-        public CreateKhachSanValidation()
+        public CreateKhachSanValidator()
         {
             RuleFor(x => x.Name)
                 .NotEmpty().WithMessage("Tên Khách Sạn Không được bỏ trống")

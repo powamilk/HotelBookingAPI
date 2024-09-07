@@ -2,6 +2,7 @@
 using HotelBookingAPI.Entities;
 using FluentValidation;
 using FluentValidation.Results;
+using AutoMapper;
 
 namespace HotelBookingAPI.Service
 {
@@ -9,24 +10,18 @@ namespace HotelBookingAPI.Service
     {
         private static List<KhachHang> _khachHangs = new();
         private readonly ILogger<KhachHangService> _logger;
-        private readonly IValidator<CreateKhachHangVM> _khachHangValidator;
+        private readonly IMapper _mapper;
 
-        public KhachHangService(ILogger<KhachHangService> logger, IValidator<CreateKhachHangVM> khachHangValidator)
+        public KhachHangService(ILogger<KhachHangService> logger, IMapper mapper)
         {
             _logger = logger;
-            _khachHangValidator = khachHangValidator;
+            _mapper = mapper;
         }
 
         public bool CreateKhachHang(CreateKhachHangVM request, out string errorMessage)
         {
             try
             {
-                ValidationResult result = _khachHangValidator.Validate(request);
-                if (!result.IsValid)
-                {
-                    errorMessage = string.Join(", ", result.Errors.Select(e => e.ErrorMessage));
-                    return false;
-                }
 
                 var khachHang = new KhachHang
                 {
@@ -52,13 +47,7 @@ namespace HotelBookingAPI.Service
         {
             if (_khachHangs.Any())
             {
-                var khachHangVMs = _khachHangs.Select(k => new KhachHangVM
-                {
-                    Id = k.Id,
-                    Name = k.Name,
-                    Email = k.Email,
-                    Phone = k.Phone
-                }).ToList();
+                var khachHangVMs = _mapper.Map<List<KhachHangVM>>(_khachHangs);
                 errorMessage = null;
                 return khachHangVMs;
             }
@@ -75,14 +64,7 @@ namespace HotelBookingAPI.Service
                 return null;
             }
 
-            var khachHangVM = new KhachHangVM
-            {
-                Id = khachHang.Id,
-                Name = khachHang.Name,
-                Email = khachHang.Email,
-                Phone = khachHang.Phone
-            };
-
+            var khachHangVM = _mapper.Map<KhachHangVM>(khachHang);
             errorMessage = null;
             return khachHangVM;
         }

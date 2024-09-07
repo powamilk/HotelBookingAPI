@@ -1,9 +1,9 @@
-using FluentValidation;
+﻿using FluentValidation;
 using FluentValidation.AspNetCore;
+using HotelBookingAPI.Entities;
 using HotelBookingAPI.Service;
 using HotelBookingAPI.ViewModel;
-using HotelBookingAPI.ViewModel.NewFolder;
-using HotelBookingAPI.ViewModel.NewFolder;
+using HotelBookingAPI.ViewModel.Validator;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,16 +12,20 @@ builder.Services.AddTransient<IKhachSanService, KhachSanService>();
 builder.Services.AddTransient<IDatPhongService, DatPhongService>();
 builder.Services.AddTransient<IKhachHangService, KhachHangService>();
 
-
-builder.Services.AddTransient<IValidator<CreateKhachSanVM>, CreateKhachSanValidation>();
-builder.Services.AddTransient<IValidator<CreatePhongVM>, CreatePhongValidation>();
-builder.Services.AddTransient<IValidator<CreateKhachHangVM>, CreateKhachHangValidation>();
-builder.Services.AddTransient<IValidator<CreateDatPhongVM>, CreateDatPhongValidation>();
+builder.Services.AddTransient<IValidator<CreateKhachSanVM>, CreateKhachSanValidator>();
+builder.Services.AddTransient<IValidator<CreatePhongVM>, CreatePhongValidator>();
+builder.Services.AddTransient<IValidator<CreateKhachHangVM>, CreateKhachHangValidator>();
+builder.Services.AddTransient<IValidator<CreateDatPhongVM>, CreateDatPhongValidator>();
 builder.Services.AddTransient<IValidator<KhachSanUpdateVM>, UpdateKhachSanValidator>();
+builder.Services.AddTransient<IValidator<UpdateDatPhongStatusVM>, UpdateDatPhongValidator>();
 
-// Add FluentValidation to the pipeline
-builder.Services.AddFluentValidationAutoValidation();
-builder.Services.AddFluentValidationClientsideAdapters();
+builder.Services.AddAutoMapper(cfg =>
+{
+    cfg.CreateMap<DatPhong, DatPhongVM>();
+    cfg.CreateMap<KhachHang, KhachHangVM>();
+    cfg.CreateMap<KhachSan, KhachSanVM>();
+    cfg.CreateMap<Phong, PhongVM>();
+});
 
 builder.Services.AddControllers();
 
@@ -35,7 +39,10 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Hotel Booking API V1");
+    });
 }
 
 app.UseHttpsRedirection();

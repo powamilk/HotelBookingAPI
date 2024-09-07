@@ -1,7 +1,9 @@
-﻿using FluentValidation;
+﻿using AutoMapper;
+using FluentValidation;
 using FluentValidation.Results;
 using HotelBookingAPI.Entities;
 using HotelBookingAPI.ViewModel;
+using HotelBookingAPI.ViewModel.Validator;
 
 namespace HotelBookingAPI.Service
 {
@@ -10,27 +12,22 @@ namespace HotelBookingAPI.Service
         private static List<KhachSan> _khachSans = new();
         private static List<Phong> _phongs = new();
         private readonly ILogger<KhachSanService> _logger;
-        private readonly IValidator<CreatePhongVM> _phongValidator;
-        private readonly IValidator<CreateKhachSanVM> _khachSanValidator;
-        private readonly IValidator<KhachSanUpdateVM> _khachSanUpdateVlidator;
-
-        public KhachSanService(ILogger<KhachSanService> logger, IValidator<CreatePhongVM> phongValidator, IValidator<CreateKhachSanVM> khachSanValidator, IValidator<KhachSanUpdateVM> khachSanUpdateValidator)
+        private readonly IMapper _mapper;
+        public KhachSanService(ILogger<KhachSanService> logger, IMapper mapper)
         {
             _logger = logger;
-            _khachSanValidator = khachSanValidator;
-            _phongValidator = phongValidator;
-            _khachSanUpdateVlidator = khachSanUpdateValidator;
+            _mapper = mapper;
         }
+
+        public bool CheckKhachSanExist(int id)
+        {
+            return _khachSans.Any(h => h.Id == id);
+        }
+
         public bool CreateKhachSan(CreateKhachSanVM request, out string errorMessage)
         {
             try
             {
-                ValidationResult result = _khachSanValidator.Validate(request);
-                if(!result.IsValid)
-                {
-                    errorMessage = string.Join(",", result.Errors.Select(e => e.ErrorMessage));
-                    return false;
-                }
                 var khachSan = new KhachSan
                 {
                     Id = _khachSans.Any() ? _khachSans.Max(h => h.Id) + 1 : 1,
@@ -61,12 +58,6 @@ namespace HotelBookingAPI.Service
                 if (khachSan == null)
                 {
                     errorMessage = "Khong tim thay khach san voi id nay";
-                    return false;
-                }
-                ValidationResult result = _phongValidator.Validate(request);
-                if (!result.IsValid)
-                {
-                    errorMessage = string.Join(",", result.Errors.Select(e => e.ErrorMessage));
                     return false;
                 }
                 var phong = new Phong
@@ -116,73 +107,40 @@ namespace HotelBookingAPI.Service
 
         public List<KhachSanVM> GetAllKhachSan(out string errorMessage)
         {
-            if(_khachSans.Any())
+            if (_khachSans.Any())
             {
-                var khachSanVM =_khachSans.Select(h => new KhachSanVM
-                {
-                    Id = h.Id,
-                    Name = h.Name,
-                    Location = h.Location,
-                    Rating = h.Rating,
-                    Description = h.Description,
-                    TotalRoom = h.TotalRoom,
-                    CreateAt = h.CreateAt,
-                    UpdateAt = h.UpdateAt,
-                }
-                ).ToList();
+                var khachSanVM = _mapper.Map<List<KhachSanVM>>(_khachSans);
                 errorMessage = null;
                 return khachSanVM;
             }
-            errorMessage = "Không có khách sạn nao trong danh sách";
+            errorMessage = "Không có khách sạn nào trong danh sách";
             return null;
         }
 
         public KhachSanVM GetKhachSanById(int id, out string errorMessage)
         {
             var khachSan = _khachSans.FirstOrDefault(h => h.Id == id);
-            if(khachSan == null)
+            if (khachSan == null)
             {
-                errorMessage = "Không tìm thấy khách sạn nào với ID này";
+                errorMessage = "Không tìm thấy khách sạn với ID này";
                 return null;
             }
-            var khachSanVM = new KhachSanVM
-            {
-                Id = khachSan.Id,
-                Name = khachSan.Name,
-                Location = khachSan.Location,
-                Rating = khachSan.Rating,
-                Description = khachSan.Description,
-                TotalRoom = khachSan.TotalRoom,
-                CreateAt = khachSan.CreateAt,
-                UpdateAt = khachSan.UpdateAt,
-            };
+
+            var khachSanVM = _mapper.Map<KhachSanVM>(khachSan); 
             errorMessage = null;
             return khachSanVM;
         }
 
         public List<PhongVM> GetPhongByKhachSanId(int khachSanId, out string errorMessage)
         {
-            var khachSan = _khachSans.FirstOrDefault(h => h.Id == khachSanId);
-            if(khachSan == null)
-            {
-                errorMessage = "Không tìm thấy khách sạn với Id này";
-                return null;
-            }    
             var rooms = _phongs.Where(r => r.HotelId == khachSanId).ToList();
             if (!rooms.Any())
             {
                 errorMessage = "Không có phòng nào trong khách sạn này.";
                 return null;
             }
-            var phongsVM = rooms.Select(e => new PhongVM
-            {
-                Id = e.Id,
-                RoomType = e.RoomType,
-                Price = e.Price,
-                Status = e.Status,
-                CheckInTime = e.CheckInTime,
-                CheckOutTime = e.CheckOutTime,
-            }).ToList();
+
+            var phongsVM = _mapper.Map<List<PhongVM>>(rooms); 
             errorMessage = null;
             return phongsVM;
         }
@@ -193,12 +151,6 @@ namespace HotelBookingAPI.Service
             if(khachSan == null)
             {
                 errorMessage = "Không tìm thấy khách sạn với Id này";
-                return false;
-            }
-            ValidationResult result = _khachSanUpdateVlidator.Validate(request);
-            if(!result.IsValid)
-            {
-                errorMessage = string.Join(",", result.Errors.Select(e => e.ErrorMessage));
                 return false;
             } 
             khachSan.Name = request.Name;

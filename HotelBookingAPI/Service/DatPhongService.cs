@@ -2,6 +2,7 @@
 using HotelBookingAPI.Entities;
 using HotelBookingAPI.ViewModel;
 using FluentValidation.Results;
+using AutoMapper;
 
 namespace HotelBookingAPI.Service
 {
@@ -9,25 +10,18 @@ namespace HotelBookingAPI.Service
     {
         private static List<DatPhong> _datPhongs = new();
         private readonly ILogger<DatPhongService> _logger;
-        private readonly IValidator<CreateDatPhongVM> _datPhongValidator;
+        private readonly IMapper _mapper;
 
-        public DatPhongService(ILogger<DatPhongService> logger, IValidator<CreateDatPhongVM> datPhongValidator)
+        public DatPhongService(ILogger<DatPhongService> logger, IMapper mapper)
         {
             _logger = logger;
-            _datPhongValidator = datPhongValidator;
+            _mapper = mapper;
         }
 
         public bool CreateDatPhong(CreateDatPhongVM request, out string errorMessage)
         {
             try
             {
-                ValidationResult result = _datPhongValidator.Validate(request);
-                if (!result.IsValid)
-                {
-                    errorMessage = string.Join(", ", result.Errors.Select(e => e.ErrorMessage));
-                    return false;
-                }
-
                 var datPhong = new DatPhong
                 {
                     Id = _datPhongs.Any() ? _datPhongs.Max(d => d.Id) + 1 : 1,
@@ -56,17 +50,7 @@ namespace HotelBookingAPI.Service
         {
             if (_datPhongs.Any())
             {
-                var datPhongsVM = _datPhongs.Select(d => new DatPhongVM
-                {
-                    Id = d.Id,
-                    CustomerId = d.CustomerId,
-                    RoomId = d.RoomId,
-                    CheckInDate = d.CheckInDate,
-                    CheckOutDate = d.CheckOutDate,
-                    BookingDate = d.BookingDate,
-                    Status = d.Status,
-                    CreateAt = d.CreateAt
-                }).ToList();
+                var datPhongsVM = _mapper.Map<List<DatPhongVM>>(_datPhongs);
                 errorMessage = null;
                 return datPhongsVM;
             }
@@ -83,18 +67,7 @@ namespace HotelBookingAPI.Service
                 return null;
             }
 
-            var datPhongVM = new DatPhongVM
-            {
-                Id = datPhong.Id,
-                CustomerId = datPhong.CustomerId,
-                RoomId = datPhong.RoomId,
-                CheckInDate = datPhong.CheckInDate,
-                CheckOutDate = datPhong.CheckOutDate,
-                BookingDate = datPhong.BookingDate,
-                Status = datPhong.Status,
-                CreateAt = datPhong.CreateAt
-            };
-
+            var datPhongVM = _mapper.Map<DatPhongVM>(datPhong);
             errorMessage = null;
             return datPhongVM;
         }

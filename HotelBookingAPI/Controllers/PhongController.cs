@@ -1,7 +1,9 @@
-﻿using HotelBookingAPI.Service;
+﻿using FluentValidation;
+using HotelBookingAPI.Service;
 using HotelBookingAPI.ViewModel;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using FluentValidation.Results;
 
 namespace HotelBookingAPI.Controllers
 {
@@ -10,27 +12,39 @@ namespace HotelBookingAPI.Controllers
     public class PhongController : ControllerBase
     {
         private readonly IKhachSanService _khachSanService;
+        private readonly IValidator<CreatePhongVM> _phongValidator;
 
-        public PhongController(IKhachSanService khachSanService)
+        public PhongController(IValidator<CreatePhongVM> phongValidator, IKhachSanService khachSanService)
         {
             _khachSanService = khachSanService;
+            _phongValidator = phongValidator;
         }
 
         [HttpPost("{hotelId}/rooms")]
-        public IActionResult TaoPhong(int khachSanId, [FromBody] CreatePhongVM request)
+        public IActionResult TaoPhong(int hotelId, [FromBody] CreatePhongVM request)
         {
-            var result = _khachSanService.CreatePhong(khachSanId, request, out string errorMessage);
-            if (!result)
+            ValidationResult result = _phongValidator.Validate(request);
+            if(!result.IsValid)
+            {
+                var error = result.Errors.Select(x => new
+                {
+                    PropertyName = x.PropertyName,
+                    ErrorMessage = x.ErrorMessage,
+                });
+                return BadRequest(error);
+            }    
+            var success = _khachSanService.CreatePhong(hotelId, request, out string errorMessage);
+            if (!success)
             {
                 return BadRequest(errorMessage);
             }
-            return CreatedAtAction(nameof(LayPhongTheoKhachSanId), new { khachSanId = khachSanId }, request);
+            return Created($"/api/hotel/{hotelId}/rooms", request);
         }
 
         [HttpGet("{hotelId}/rooms")]
-        public IActionResult LayPhongTheoKhachSanId(int khachSanId)
+        public IActionResult LayPhongTheoKhachSanId(int hotelId)
         {
-            var phongs = _khachSanService.GetPhongByKhachSanId(khachSanId, out string errorMessage);
+            var phongs = _khachSanService.GetPhongByKhachSanId(hotelId, out string errorMessage);
             if (phongs == null)
             {
                 return NotFound(errorMessage);

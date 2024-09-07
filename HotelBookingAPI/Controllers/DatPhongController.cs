@@ -2,6 +2,9 @@
 using HotelBookingAPI.ViewModel;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using FluentValidation.Results;
+using HotelBookingAPI.ViewModel.Validator;
+using FluentValidation;
 
 
 namespace HotelBookingAPI.Controllers
@@ -11,21 +14,35 @@ namespace HotelBookingAPI.Controllers
     public class DatPhongController : ControllerBase
     {
         private readonly IDatPhongService _datPhongService;
+        private readonly IValidator<CreateDatPhongVM> _datPhongValidator;
+        private readonly IValidator<UpdateDatPhongStatusVM> _datPhongStatusValidator;
 
-        public DatPhongController(IDatPhongService datPhongService)
+        public DatPhongController(IDatPhongService datPhongService, IValidator<CreateDatPhongVM> createDatPhongValidator, IValidator<UpdateDatPhongStatusVM> datPhongStatusValidator)
         {
             _datPhongService = datPhongService;
+            _datPhongValidator = createDatPhongValidator;
+            _datPhongStatusValidator = datPhongStatusValidator;
         }
 
         [HttpPost]
         public IActionResult TaoDatPhong([FromBody] CreateDatPhongVM request)
         {
-            var result = _datPhongService.CreateDatPhong(request, out string errorMessage);
-            if (!result)
+            ValidationResult result = _datPhongValidator.Validate(request);
+            if (!result.IsValid)
+            {
+                var error = result.Errors.Select(x => new
+                {
+                    Property = x.PropertyName,
+                    Error = x.ErrorMessage
+                });
+                return BadRequest(error);  
+            }
+            var datPhong = _datPhongService.CreateDatPhong(request, out string errorMessage);
+            if (!datPhong)
             {
                 return BadRequest(errorMessage);
             }
-            return CreatedAtAction(nameof(LayDatPhongTheoId), new { id = request.Id }, request);
+            return CreatedAtAction(nameof(TaoDatPhong), request);
         }
 
         [HttpGet]
@@ -53,8 +70,18 @@ namespace HotelBookingAPI.Controllers
         [HttpPut("{id}/status")]
         public IActionResult CapNhatTrangThaiDatPhong(int id, [FromBody] UpdateDatPhongStatusVM request)
         {
-            var result = _datPhongService.UpdateDatPhongStatus(id, request, out string errorMessage);
-            if (!result)
+            ValidationResult result = _datPhongStatusValidator.Validate(request);
+            if (!result.IsValid)
+            {
+                var error = result.Errors.Select(x => new
+                {
+                    Property = x.PropertyName,
+                    Error = x.ErrorMessage
+                });
+                return BadRequest(error);
+            }
+            var succes = _datPhongService.UpdateDatPhongStatus(id, request, out string errorMessage);
+            if (!succes)
             {
                 if (errorMessage.Contains("không tìm thấy"))
                 {

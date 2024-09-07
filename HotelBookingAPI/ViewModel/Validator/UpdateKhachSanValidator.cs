@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace HotelBookingAPI.ViewModel.NewFolder
+namespace HotelBookingAPI.ViewModel.Validator
 {
     public class UpdateKhachSanValidator : AbstractValidator<KhachSanUpdateVM>
     {
