@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using FluentValidation.AspNetCore;
 using HotelBookingAPI.Entities;
+using HotelBookingAPI.MapperProfile;
 using HotelBookingAPI.Service;
 using HotelBookingAPI.ViewModel;
 using HotelBookingAPI.ViewModel.Validator;
@@ -19,13 +20,7 @@ builder.Services.AddTransient<IValidator<CreateDatPhongVM>, CreateDatPhongValida
 builder.Services.AddTransient<IValidator<KhachSanUpdateVM>, UpdateKhachSanValidator>();
 builder.Services.AddTransient<IValidator<UpdateDatPhongStatusVM>, UpdateDatPhongValidator>();
 
-builder.Services.AddAutoMapper(cfg =>
-{
-    cfg.CreateMap<DatPhong, DatPhongVM>();
-    cfg.CreateMap<KhachHang, KhachHangVM>();
-    cfg.CreateMap<KhachSan, KhachSanVM>();
-    cfg.CreateMap<Phong, PhongVM>();
-});
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 builder.Services.AddControllers();
 

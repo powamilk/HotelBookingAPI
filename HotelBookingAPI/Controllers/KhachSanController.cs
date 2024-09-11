@@ -66,7 +66,7 @@ namespace HotelBookingAPI.Controllers
             return Ok(khachSan);
         }
 
-        [HttpPut]
+        [HttpPut("{id}")]
         public IActionResult UpdateKhachSan(int id, [FromBody] KhachSanUpdateVM request)
         {
             ValidationResult result = _khachSanUpdateValidator.Validate(request);
@@ -87,7 +87,7 @@ namespace HotelBookingAPI.Controllers
             return Ok(request);
         }
 
-        [HttpDelete]
+        [HttpDelete("{khachSanId}")]
         public IActionResult DeleteKhachSan(int khachSanId)
         {
             var result = _khachSanService.DeleteKhachSan(khachSanId, out string errorMessage);
